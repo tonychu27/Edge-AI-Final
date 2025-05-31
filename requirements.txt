@@ -1,3 +1,9 @@
+torch
+datasets
+vllm
+gptqmodel
+threadpoolctl
+device_smi
 accelerate==1.7.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.12.4

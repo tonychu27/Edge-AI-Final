@@ -14,14 +14,25 @@ from vllm import LLM, SamplingParams
 #####################################################################
 
 def generate_with_vllm(model, tokenizer, prompt, max_new_tokens):
+    
     sampling_params = SamplingParams(
         max_tokens=max_new_tokens,
         temperature=0.7,
         n=1,
         stop_token_ids=[tokenizer.eos_token_id],
     )
+
     outputs = model.generate(prompt, sampling_params)
-    return outputs
+    request_output = outputs[0]
+    
+    prompt_tokens = list(request_output.prompt_token_ids)
+    generated_tokens_only = list(request_output.outputs[0].token_ids)
+    full_sequence_tokens = prompt_tokens + generated_tokens_only
+
+    input_ids = torch.tensor([prompt_tokens], device="cuda:0")
+    generated = torch.tensor([full_sequence_tokens], device="cuda:0")
+
+    return request_output.outputs[0].text, input_ids, generated
 
 def evaluate_ppl(model, tokenizer, device="cuda:0"):
     test_dataset = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")
@@ -59,7 +70,7 @@ def main():
     max_new_tokens = 256
     device = 'cuda:0'
     
-    model_name = "JCH25/Llama-3.2-3B-pruned-0.55-LoRA-gptqv2" # "Tony027/Llama-3.2-3b-Instruct-gptq" # "meta-llama/Llama-3.2-3B-Instruct"
+    model_name = "JCH25/Llama-3.2-3B-pruned-0.5-LoRA-gptq" # "Tony027/Llama-3.2-3b-Instruct-gptq" # "meta-llama/Llama-3.2-3B-Instruct"
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -90,15 +101,10 @@ def main():
     
     warmup_prompt = "Explain what AI is."
     print("Warming up vLLM model...")
-    inputs = tokenizer(warmup_prompt, return_tensors="pt").to(device)
-    input_ids = inputs["input_ids"]
-
     for _ in tqdm(range(5), desc="Warm Up vLLM..."): # Corrected tqdm range
-        _ = generate_with_vllm(vllm_model, tokenizer, warmup_prompt, max_new_tokens)
+        response, input_ids, generated = generate_with_vllm(vllm_model, tokenizer, warmup_prompt, max_new_tokens)
         
     prompt_text = "How to learn a new language?"
-    inputs = tokenizer(prompt_text, return_tensors="pt").to(device)
-    input_ids = inputs["input_ids"]
     tputs = []
     time_record = []
 
@@ -108,21 +114,20 @@ def main():
         end = torch.cuda.Event(enable_timing=True)
         start.record()
         
-        response = generate_with_vllm(vllm_model, tokenizer, prompt_text, max_new_tokens)
+        response, input_ids, generated = generate_with_vllm(vllm_model, tokenizer, prompt_text, max_new_tokens)
         
         end.record()
-        
         torch.cuda.synchronize()
         elapsed_ms = start.elapsed_time(end)
-    
-        tput = max_new_tokens / (elapsed_ms / 1000)
+
+        tput = generated[0][input_ids.shape[1]:].shape[0] / (elapsed_ms / 1000)
         time_record.append(elapsed_ms / 1000)
         tputs.append(tput)
 
 
     sorted_tputs = np.sort(tputs)[2:-2]
     org_tput = np.mean(sorted_tputs)
-    print(f'\nPrompt: {prompt_text}\nResponse: {response[0].outputs[0].text}\n')
+    print(f'\nPrompt: {prompt_text}\nResponse: {response}\n')
 
     print(f'Time Record: {time_record}')
     print(f'Throughput Record: {tputs} toks/s\n')
