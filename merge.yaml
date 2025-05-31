@@ -1,0 +1,4 @@
+merge_method: arcee_fusion
+base_model: meta-llama/Llama-3.2-3B
+models: 
+  - model: meta-llama/Llama-3.2-3B-Instruct
