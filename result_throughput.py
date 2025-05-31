@@ -70,7 +70,7 @@ def main():
     max_new_tokens = 256
     device = 'cuda:0'
     
-    model_name = "JCH25/Llama-3.2-3B-pruned-0.5-LoRA-gptq" # "Tony027/Llama-3.2-3b-Instruct-gptq" # "meta-llama/Llama-3.2-3B-Instruct"
+    model_name = "JCH25/Llama-3.2-3B-pruned-0.55-LoRA-gptqv2" # "Tony027/Llama-3.2-3b-Instruct-gptq" # "meta-llama/Llama-3.2-3B-Instruct"
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
