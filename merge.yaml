@@ -1,4 +1,22 @@
+# merge_method: sce
+# base_model: meta-llama/Llama-3.2-3B
+# models: 
+#   - model: meta-llama/Llama-3.2-3B-Instruct
+
+# 8.9
 merge_method: arcee_fusion
 base_model: meta-llama/Llama-3.2-3B
 models: 
   - model: meta-llama/Llama-3.2-3B-Instruct
+
+
+# merge_method: linear
+# models: 
+#   - model: meta-llama/Llama-3.2-3B-Instruct
+#     parameters:
+#       weight: 0.5
+#   - model: meta-llama/Llama-3.2-3B
+#     parameters:
+#       weight: 1.0
+
+

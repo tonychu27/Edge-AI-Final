@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import matplotlib.pyplot as plt
@@ -208,7 +208,7 @@ class FFNPruner:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name_or_path', default='meta-llama/Llama-3.2-3B', help='model name or path')
+    parser.add_argument('--model_name_or_path', default='meta-llama/Llama-3.2-3B-Instruct', help='model name or path')
     parser.add_argument('--image_path', default='ffn_outputs', help='path to save images')
     parser.add_argument('--output_path', default='./llama-3.2-3B-pruned-0.95', help='path to save pruned model')
     args = parser.parse_args()
@@ -224,8 +224,8 @@ if __name__ == "__main__":
     os.makedirs(pruner.output_path, exist_ok=True)
     os.makedirs(pruner.image_path, exist_ok=True)
     
-    # total_params = pruner.calculate_parameters()
-    # print(f"Total parameters before pruning: {total_params:,}")
+    total_params = pruner.calculate_parameters()
+    print(f"Total parameters before pruning: {total_params:,}")
     # calibrate and reorder the model
     pruner.calibrate_and_reorder(calibrate_samples=100)
     perplexity = pruner.test_perplexity(num_samples=0)
@@ -235,5 +235,8 @@ if __name__ == "__main__":
     perplexity = pruner.test_perplexity(num_samples=0)
     print("Perplexity after pruning:", perplexity)
      
-    # total_params = pruner.calculate_parameters()
-    # print(f"Total parameters after pruning: {total_params:,}")
+    total_params = pruner.calculate_parameters()
+    print(f"Total parameters after pruning: {total_params:,}")
+    
+    
+    
