@@ -31,11 +31,14 @@ pip install -r requirements.txt
 ```
 
 ## Evaluation
-
-Download the optimized LLM model from my [huggingface page](https://huggingface.co/Tony027/Llama-3.2-3B-pruned-0.5-LoRA).
-
-
 Run the script to evaluate the throughput and perplexity.
+
+For evaluating perplexity
 ```bash
-python3 result.py
+python3 result_perplexity.py
+```
+
+For evaluating throughput
+```bash
+python3 result_throughput.py
 ```

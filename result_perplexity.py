@@ -144,7 +144,7 @@ def main():
     # rounded_tput = round(org_tput, 1)
     ppl = round(ppl, 2)
 
-    with open("result.csv", mode="w", newline="") as file:
+    with open("result.csv", mode="a", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["value"])
         writer.writerow([ppl])
